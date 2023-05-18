@@ -1,0 +1,80 @@
+server:
+  port: 9555
+spring:
+  web:
+    resources:
+      static-locations: /static/
+  servlet:
+    multipart:
+      max-file-size: 512000MB
+      max-request-size: 512000MB
+  datasource:
+    name: mysql-datasource
+    url: jdbc:mysql://114.242.29.129:10054/shangfa?characterEncoding=UTF-8
+    username: root
+    password: 123456
+#    url: jdbc:mysql://127.0.0.1:3306/shangfa?characterEncoding=UTF-8
+#    username: root
+#    password: Abc123=Abc123
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+    default-property-inclusion: non_null
+  mvc:
+    static-path-pattern: /**
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 全局默认主键类型
+      id-type: UUID
+      # 表名、是否使用下划线命名，默认数据库表使用下划线命名
+      table-underline: true
+      # 逻辑已删除值(默认为 1)
+      logic-delete-value: true
+      # 逻辑未删除值(默认为 0)
+      logic-not-delete-value: false
+  mapper-locations:
+  - /mapper/*.xml
+  type-aliases-package: com.vip.file.model
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countsql
+swagger:
+  title: VIP-FILE-MANAGER Swagger API
+  description: 本地文件管理服务
+  version: 1.0.0
+logging:
+  config: classpath:logback.xml
+file:
+  # 文件存储路径
+  save-path: /root/sf/filetools/appendix
+  # 断点续传文件配置路径
+  conf-path: /root/sf/filetools/appendix/conf
+  # 知识文件存储路径
+  kownledge-save-path: /root/sf/filetools/kownledge
+  # 断点续传知识文件配置路径
+  kownledge-conf-path: /root/sf/filetools/kownledge/conf
+  # 日志文件存储路径
+  logfile-path: /root/sf/sfapi/logs/
+
+#   文件存储路径
+#  save-path: D:\graduateCode\uploadfile\appendix
+#  # 断点续传文件配置路径
+#  conf-path: D:\graduateCode\uploadfile\appendix\conf
+#  # 知识文件存储路径
+#  kownledge-save-path: D:\graduateCode\uploadfile\kownledge
+#  # 断点续传知识文件配置路径
+#  kownledge-conf-path: D:\graduateCode\uploadfile\kownledge\conf
+#  # 日志文件存储路径
+#  logfile-path: D:\graduateCode\商发\trunck\shangfaAPI\logs\
+
+# 配置文件限制字段数
+  fieldLimitCount: 10000
+# 日志文件文件限制数量
+  logLimitCount: 3
