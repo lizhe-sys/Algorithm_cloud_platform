@@ -1,0 +1,39 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.ModelCallDAO">
+
+    <insert id="save" parameterType="ModelCall" useGeneratedKeys="true" keyProperty="modelCallId">
+        insert into modelcall values ( #{modelCallId},#{callTime},#{stdModelId},#{modelMgrId},#{userId},#{isTrue},#{deleted} )
+    </insert>
+
+    <select id="getModelCallByStdModelId" parameterType="Long" resultType="ModelCall">
+        select mc.* , u2.userName , s2.stdModelName  , m.modelName  from modelcall  mc , `user` u2  , stdmodel s2 , modelmgr m where mc.deleted = 0 and u2.deleted = 0 and s2.deleted =0 and m.deleted = 0
+        and mc.stdModelId = #{ stdModelId }
+        and mc.userId = u2.userId and mc.stdModelId = s2.stdModelId and mc.modelMgrId = m.modelMgrId
+        order by modelCallId desc
+    </select>
+
+    <select id="modelCallInfo" resultType="ModelCallInfoDto">
+        SELECT modelMgrId , COUNT( modelCallId ) as modelCallCount FROM shangfa.modelcall where deleted = 0 group by modelMgrId
+    </select>
+
+    <select id="getCallCountByStdModelId" parameterType="Long" resultType="Integer">
+        SELECT COUNT( modelCallId ) from modelcall where deleted = 0 and stdModelId = #{ stdModelId }
+    </select>
+
+    <update id="deleteModelCallByStdModelId" parameterType="ModelCall">
+        update modelcall set deleted = 1 where stdModelId = #{ stdModelId }
+    </update>
+
+    <update id="deleteModelCallByModelMgrId" parameterType="ModelCall">
+        update modelcall set deleted = 1 where modelMgrId = #{ modelMgrId }
+    </update>
+
+    <select id="firstPageModelCallInfo" resultType="StdModelInfo">
+        SELECT  month( callTime ) as month, COUNT( modelCallId ) as callCount
+        from modelcall
+        where deleted = 0 and year( callTime ) = #{year}
+        GROUP BY  month( callTime )
+    </select>
+
+</mapper>

@@ -1,0 +1,98 @@
+html,body{
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow:hidden
+}
+
+iframe {
+    height: calc(100% - 25px);
+    width: 100%;
+    border: none;
+}
+
+#exit{
+    /*color: #FFFFFF;*/
+    /*background: #2C2C2C;*/
+    /*border: 0;*/
+    /*cursor:pointer;*/
+    /*font-size: 13px;*/
+}
+
+#topbar{
+    height: 25px;
+    background: #2C2C2C;
+}
+
+.treeData{
+    position: fixed;
+    top: 30%;
+    left: 0px;
+    width: 35%;
+    height: 70%;
+    background: #b9def0;
+    overflow: auto;
+}
+
+.fields{
+    top: 30%;
+    right: 0%;
+    width: 100%;
+    height: auto;
+   /*background: #9acfea; *//*-- fyy --*/
+    overflow: auto;
+}
+
+.query{
+    /*position: fixed;*/
+    top: 0px;
+    right: 0px;
+    width: 100%;
+    height: 25%;
+    background: #dde9ff;
+}
+.el-tree{
+    background: #b9def0;
+}
+/*方岩岩-css样式*/
+.fyy_content{
+      width: 98%;
+      height: 100%;
+      margin: 10px 1% 0;
+      display: block;
+}
+textarea.el-textarea__inner{
+      width: 100%;
+      border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    -webkit-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

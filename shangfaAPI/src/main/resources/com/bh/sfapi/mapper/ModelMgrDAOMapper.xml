@@ -1,0 +1,74 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.ModelMgrDAO">
+
+    <insert id="save" parameterType="ModelMgr" useGeneratedKeys="true" keyProperty="modelMgrId">
+        insert into modelmgr( modelMgrId,dataMgrId,modelType,modelName,modelDescription,userId,createTime,deleted,isShare ) values ( #{modelMgrId},#{dataMgrId},#{modelType},#{modelName},#{modelDescription},#{userId},#{createTime},#{deleted},#{isShare} )
+    </insert>
+
+    <update id="update"  parameterType="Long">
+        UPDATE modelmgr
+        <trim prefix="set" suffixOverrides=",">
+            <if test="modelName!=null">modelName=#{modelName},</if>
+            <if test="modelDescription!=null">modelDescription=#{modelDescription},</if>
+            <if test="deleted!=null">deleted=#{deleted},</if>
+            <if test="userId!=null">userId=#{userId},</if>
+            <if test="modelResultTableName!=null">modelResultTableName=#{modelResultTableName},</if>
+        </trim>
+        WHERE modelMgrId=#{modelMgrId}
+    </update>
+
+    <select id="getModelMgrById" parameterType="String" resultType="ModelMgr">
+        select * from modelmgr where modelMgrId=#{modelMgrId} and deleted = 0
+    </select>
+
+    <select id="findAll" resultType="ModelMgr">
+        select m.* , d.dataMgrName , d.dataType, u.userName as userName , s.stdModelType , s.stdModelName
+        from modelmgr as m , datamgr as d , user as u ,stdmodel s
+        where m.deleted = 0 and d.deleted = 0 and u.deleted = 0 and m.dataMgrId = d.dataMgrId and m.userId = u.userId and s.deleted = 0 and m.modelType = s.stdModelId
+        order by m.modelMgrId desc
+    </select>
+
+    <select id="getSharedModelMgrList" parameterType="Long" resultType="ModelMgr">
+        select * from modelmgr where deleted = 0 and ( isShare = 1 or userId = #{ userId } )
+    </select>
+
+    <select id="getModelMgrListByDataMgrId" parameterType="Long" resultType="ModelMgr">
+        select * from modelmgr where dataMgrId=#{dataMgrId} and deleted = 0 and ( isShare = 1 or userId = #{ userId } )
+    </select>
+
+    <select id="dimQueryModelMgr" parameterType="ModelMgr" resultType="ModelMgr">
+        select m.* ,  d.dataMgrName , d.dataType, u.userName as userName , s.stdModelType , s.stdModelName
+        from modelmgr as m , datamgr as d , user as u ,stdmodel s
+        where m.deleted = 0 and d.deleted = 0 and u.deleted = 0 and m.dataMgrId = d.dataMgrId and m.userId = u.userId and s.deleted = 0 and m.modelType = s.stdModelId
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="modelName!=null">m.modelName like concat(concat("%",#{modelName}),"%") and</if>
+            <if test="modelDescription!=null">m.modelDescription like concat(concat("%",#{modelDescription}),"%") and</if>
+            <if test="createTime!=null">m.createTime like concat(concat("%",#{createTime}),"%") and</if>
+            <if test="dataMgrName!=null">d.dataMgrName like concat(concat("%",#{dataMgrName}),"%") and</if>
+            <if test="stdModelName!=null">s.stdModelName like concat(concat("%",#{stdModelName}),"%") and</if>
+            <if test="stdModelType!=null">s.stdModelType = #{stdModelType}  and</if>
+        </trim>
+        order by m.modelMgrId desc
+    </select>
+
+    <select id="getNewModelMgr" parameterType="Long" resultType="ModelMgr">
+        SELECT * FROM modelmgr where userId = #{userId} order by modelMgrId desc limit 1
+    </select>
+
+    <select id="getModelMgrByName" parameterType="String" resultType="ModelMgr">
+        SELECT * FROM modelmgr where modelName = #{modelName} and deleted = 0
+    </select>
+
+    <select id="getModelMgrListByStdModelId" parameterType="Long" resultType="ModelMgr">
+        SELECT * FROM modelmgr where modelType = #{stdModelId} and deleted = 0
+    </select>
+
+    <select id="modelMgrInfo" resultType="ModelMgrInfo">
+        select m.modelName , m.createTime,  u.userName as userName , s.stdModelType as type
+        from modelmgr as m , user as u ,stdmodel s
+        where m.deleted = 0 and  u.deleted = 0 and m.userId = u.userId and s.deleted = 0 and m.modelType = s.stdModelId
+        order by m.modelMgrId desc
+    </select>
+
+</mapper>

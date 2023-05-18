@@ -1,0 +1,170 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.MapMgrDAO">
+
+    <insert id="save" parameterType="MapMgr">
+        insert into  mapmgr values ( #{mapMgrId},#{mapName},#{useBase},#{deleted},#{modelMgrId},#{userId},#{createTime},#{mapType},#{modelMapName},#{dataMgrId} )
+    </insert>
+
+    <update id="deleteMapMgr" parameterType="Long">
+        update mapmgr set deleted = 1 where mapMgrId = #{mapMgrId}
+    </update>
+
+    <select id="queryDataMgrList" resultType="MapDto">
+        select map.*  , model.modelName , u.userName from mapmgr as map , modelmgr as model , user as u where map.deleted = 0 and model.deleted = 0 and u.deleted = 0 and map.modelMgrId = model.modelMgrId and map.userId = u.userId order by map.mapMgrId desc
+    </select>
+
+    <select id="queryDataMapMgrList" resultType="MapDto">
+        select map.*  , d2.dataMgrName, u.userName from mapmgr as map , datamgr d2  , user as u where map.deleted = 0 and map.mapType = 1 and u.deleted = 0 and map.dataMgrId = d2.dataMgrId and map.userId = u.userId order by map.mapMgrId desc
+    </select>
+
+    <select id="queryModelMapMgrList" resultType="MapDto">
+        select map.*  , model.modelName , u.userName from mapmgr as map , modelmgr as model , user as u where map.deleted = 0 and map.mapType = 2 and model.deleted = 0 and u.deleted = 0 and map.modelMgrId = model.modelMgrId and map.userId = u.userId order by map.mapMgrId desc
+    </select>
+
+    <select id="queryMapMgrListByModelMgrId" parameterType="Long" resultType="MapDto">
+        select map.*   from mapmgr as map where map.deleted = 0 and map.modelMgrId = #{ modelMgrId } order by map.mapMgrId desc
+    </select>
+
+
+    <select id="queryMapMgrListByDataMgrId" parameterType="Long" resultType="MapDto">
+        select map.*   from mapmgr as map where map.deleted = 0 and map.dataMgrId = #{ dataMgrId } order by map.mapMgrId desc
+    </select>
+
+
+
+    <select id="queryMapMgrById" parameterType="Long" resultType="MapDto">
+        select map.*  from mapmgr as map where map.deleted = 0 and map.mapMgrId = #{ mapMgrId }
+    </select>
+
+    <select id="queryModelMapMgrById" parameterType="Long" resultType="MapDto">
+        select map.*  , model.modelName , u.userName from mapmgr as map , modelmgr as model , user as u where map.deleted = 0 and model.deleted = 0 and u.deleted = 0 and map.modelMgrId = model.modelMgrId and map.userId = u.userId and map.mapMgrId = #{ mapMgrId }
+    </select>
+
+    <select id="queryDataMapMgrById" parameterType="Long" resultType="MapDto">
+        select map.*  , d2.dataMgrName, u.userName from mapmgr as map , datamgr d2  , user as u where map.deleted = 0 and u.deleted = 0 and map.dataMgrId = d2.dataMgrId and map.userId = u.userId and map.mapMgrId = #{ mapMgrId }
+    </select>
+
+    <select id="dimQueryMapMgr" parameterType="MapMgr" resultType="MapDto">
+        select map.*  , model.modelName , u.userName from mapmgr as map , modelmgr as model , user as u where map.deleted = 0 and model.deleted = 0 and u.deleted = 0 and map.modelMgrId = model.modelMgrId and map.userId = u.userId
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="mapName!=null">map.mapName like concat(concat("%",#{mapName}),"%") and</if>
+        </trim>
+        order by map.mapMgrId desc
+    </select>
+
+    <select id="dimQueryDataMapMgr" parameterType="MapMgr" resultType="MapDto">
+        select map.*  , d2.dataMgrName, u.userName from mapmgr as map , datamgr d2  , user as u where map.deleted = 0 and map.mapType = 1  and u.deleted = 0 and map.dataMgrId = d2.dataMgrId and map.userId = u.userId
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="mapName!=null">map.mapName like concat(concat("%",#{mapName}),"%") and</if>
+            <if test="dataMgrName!=null">d2.dataMgrName like concat(concat("%",#{dataMgrName}),"%") and</if>
+        </trim>
+        order by map.mapMgrId desc
+    </select>
+
+    <select id="dimQueryModelMapMgr" parameterType="MapMgr" resultType="MapDto">
+        select map.*  , model.modelName , u.userName from mapmgr as map , modelmgr as model , user as u where map.deleted = 0 and model.deleted = 0 and u.deleted = 0 and map.modelMgrId = model.modelMgrId and map.userId = u.userId
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="mapName!=null">map.mapName like concat(concat("%",#{mapName}),"%") and</if>
+            <if test="modelName!=null">model.modelName like concat(concat("%",#{modelName}),"%") and</if>
+        </trim>
+        order by map.mapMgrId desc
+    </select>
+
+    <select id="getNewAddMapMgr" parameterType="Long" resultType="MapMgr">
+        select *  from mapmgr where userId = #{ userId } order by mapMgrId desc limit 1
+    </select>
+
+
+    <select id="queryXAxisByMapMgrId" parameterType="Long" resultType="MapX">
+        select * from map_x where mapMgrId = #{ mapMgrId }
+    </select>
+
+    <select id="queryYAxisByMapMgrId" parameterType="Long" resultType="MapY">
+        select * from map_y where mapMgrId = #{ mapMgrId }
+    </select>
+
+    <select id="queryBaseLineByMapMgrId" parameterType="Long" resultType="MapBase">
+        select * from map_base where mapMgrId = #{ mapMgrId }
+    </select>
+
+    <insert id="saveXAxis" parameterType="MapX">
+        insert into  map_x values ( #{map_x_id},#{xName},#{xFormula},#{xUnit},#{mapMgrId} )
+    </insert>
+
+    <insert id="saveYAxis" parameterType="MapY">
+        insert into  map_y values ( #{map_y_id},#{yName},#{yFormula},#{yUnit},#{mapMgrId} )
+    </insert>
+
+    <insert id="saveBaseLine" parameterType="MapBase">
+        insert into  map_base values ( #{map_base_id},#{baseName},#{baseFormula},#{baseUnit},#{mapMgrId},#{baseType} )
+    </insert>
+
+    <select id="MapMgrInfo" resultType="MapInfoDto">
+        SELECT mapType , COUNT( mapMgrId ) as mapCount FROM shangfa.mapmgr where deleted = 0 group by mapType
+    </select>
+
+    <select id="queryMapMgrByName" parameterType="String" resultType="MapMgr">
+        select * from mapmgr where mapName = #{ mapName } and deleted = 0
+    </select>
+
+    <update id="updateMapMgr" parameterType="MapMgr">
+        UPDATE mapmgr
+        <trim prefix="set" suffixOverrides=",">
+        <if test="mapName!=null">mapName=#{mapName}</if>
+        </trim>
+        WHERE mapMgrId=#{mapMgrId}
+    </update>
+    <update id="updateMapX" parameterType="MapX">
+        UPDATE map_x
+        <trim prefix="set" suffixOverrides=",">
+            xName=#{xName},xUnit=#{xUnit},xFormula=#{xFormula}
+        </trim>
+        WHERE map_x_id=#{map_x_id}
+    </update>
+    <update id="updateMapY" parameterType="MapY">
+        UPDATE map_y
+        <trim prefix="set" suffixOverrides=",">
+            yName=#{yName},yUnit=#{yUnit},yFormula=#{yFormula}
+        </trim>
+        WHERE map_y_id=#{map_y_id}
+    </update>
+    <update id="updateMapBase" parameterType="MapBase">
+        update map_base
+        <trim prefix="set" suffixOverrides=",">
+            baseName=#{baseName},baseFormula=#{baseFormula},baseUnit=#{baseFormula}
+        </trim>
+        where map_base_id=#{map_base_id}
+    </update>
+
+    <select id="overviewMapCount" parameterType="Long" resultType="Integer">
+        select count( mapMgrId ) from mapmgr where mapType = 3 and  deleted = 0 and dataMgrId = #{ dataMgrId }
+    </select>
+
+    <select id="getMapCountByDataMgrId" resultType="Integer">
+        select count( mapMgrId ) from mapmgr where mapType = 1 and dataMgrId = #{ dataMgrId } and  deleted = 0
+    </select>
+
+    <select id="getTypeCount" resultType="TypeCountDto">
+        SELECT mapType as type , COUNT( mapMgrId ) as num  from mapmgr where deleted = 0 GROUP BY mapType
+    </select>
+    <select id="reDataMgr" parameterType="Long" resultType="DataMgr">
+        select * from datamgr where userId=#{id} and deleted = 0
+    </select>
+    <select id="queryMapMgrListBydataMgrId" parameterType="Long" resultType="mapMgr">
+        select * from mapmgr where dataMgrId=#{dataMgrId} and deleted=0
+    </select>
+    <select id="queryMapMgrBydataMgrId" parameterType="Long" resultType="mapMgr">
+        select * from mapmgr where dataMgrId=#{dataMgrId} and deleted=0
+    </select>
+    <update id="updatedatamgr" parameterType="Long">
+        update mapmgr set dataMgrId=0 where dataMgrId=#{dataMgrId}
+    </update>
+    <delete id="delMapY" parameterType="Long">
+        delete from map_y where map_y_id=#{map_y_id}
+    </delete>
+    <select id="getMap_y_Id" parameterType="MapY" resultType="Long">
+        select map_y_id from map_y order by map_y_id desc limit 1
+    </select>
+
+</mapper>

@@ -1,0 +1,103 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.FaultCaseDAO">
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into  faultcase values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.faultCaseId},#{item.faultCaseName},#{item.healthMgrId},#{item.mapMgrId},#{item.userId},#{item.faultStartTime},#{item.faultEndTime},#{item.faultDescription},#{item.createTime},#{item.deleted},#{item.recordCount })
+        </foreach>
+    </insert>
+
+    <insert id="save" parameterType="FaultCase">
+        insert into  faultcase values ( #{faultCaseId},#{faultCaseName},#{healthMgrId},#{mapMgrId},#{userId},#{faultStartTime},#{faultEndTime},#{faultDescription},#{createTime},#{deleted},#{ recordCount } )
+    </insert>
+
+    <select id="queryFaultCaseById" resultType="FaultCaseDto">
+        SELECT f.* , u.userName FROM faultcase f , `user` u where f.deleted = 0 and u.deleted  = 0  and f.userId = u.userId and f.faultCaseId = #{ faultCaseId }
+    </select>
+
+    <update id="deleteFaultCaseById" parameterType="Long">
+        update faultcase set deleted = 1 where  faultCaseId = #{ faultCaseId }
+    </update>
+
+
+    <select id="queryFaultCaseList" resultType="FaultCaseDto">
+        SELECT f.* , u2.userName , res3.healthMgrName ,res3.dataMgrName , res3.dataMgrId, res3.modelName , res3.modelMgrId
+        from faultcase f , `user` u2 ,
+        (
+        select res2.* , d.dataMgrName
+        from
+        ( select res1.healthMgrId , res1.healthMgrName, res1.dataMgrId, m.modelMgrId ,m.modelName
+        from
+        ( select h.healthMgrId , h.healthMgrName, h.modelMgrId , h.dataMgrId
+        from
+        healthmgr h where h.deleted  = 0 ) as res1
+        left JOIN
+        modelmgr m
+        on m.deleted  = 0 and res1.modelMgrId = m.modelMgrId
+        ) as res2 , datamgr d
+        where  d.deleted = 0 and res2.dataMgrId = d.dataMgrId
+        order by res2.healthMgrId desc
+        ) as res3
+        where f.deleted = 0 and f.healthMgrId  = res3.healthMgrId and f.userId  = u2.userId
+        order by f.faultCaseId desc
+    </select>
+
+    <select id="dimQueryFaultCaseListByPage" parameterType="FaultCaseDto" resultType="FaultCaseDto">
+        SELECT f.* , u2.userName , res3.healthMgrName ,res3.dataMgrName , res3.dataMgrId, res3.modelName , res3.modelMgrId
+        from faultcase f , `user` u2 ,
+        (
+        select res2.* , d.dataMgrName
+        from
+        ( select res1.healthMgrId , res1.healthMgrName, res1.dataMgrId, m.modelMgrId ,m.modelName
+        from
+        ( select h.healthMgrId , h.healthMgrName, h.modelMgrId , h.dataMgrId
+        from
+        healthmgr h where h.deleted  = 0 ) as res1
+        left JOIN
+        modelmgr m
+        on m.deleted  = 0 and res1.modelMgrId = m.modelMgrId
+        ) as res2 , datamgr d
+        where  d.deleted = 0 and res2.dataMgrId = d.dataMgrId
+        order by res2.healthMgrId desc
+        ) as res3
+        where f.deleted = 0 and f.healthMgrId  = res3.healthMgrId and f.userId  = u2.userId
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="faultCaseName!=null">f.faultCaseName like concat(concat("%",#{faultCaseName}),"%") and</if>
+            <if test="dataMgrName!=null">res3.dataMgrName like concat(concat("%",#{dataMgrName}),"%") and</if>
+            <if test="healthMgrName!=null">res3.healthMgrName like concat(concat("%",#{healthMgrName}),"%") and</if>
+            <if test="modelName!=null">res3.modelName like concat(concat("%",#{modelName}),"%") and</if>
+        </trim>
+        order by f.faultCaseId desc
+    </select>
+
+    <update id="updateFaultCase" parameterType="Long">
+        update faultcase
+        <trim prefix="set" suffixOverrides=",">
+            <if test="faultCaseName!=null">faultCaseName=#{faultCaseName},</if>
+            <if test="faultDescription!=null">faultDescription=#{faultDescription},</if>
+            <if test="createTime!=null">createTime=#{createTime},</if>
+            <if test="faultStartTime!=null">faultStartTime=#{faultStartTime},</if>
+            <if test="faultEndTime!=null">faultEndTime=#{faultEndTime},</if>
+            <if test="recordCount!=null">recordCount=#{recordCount},</if>
+        </trim>
+        WHERE faultCaseId=#{faultCaseId}
+    </update>
+
+    <select id="queryFaultCaseListByMapMgrId" parameterType="Long" resultType="FaultCase">
+        SELECT f.* FROM faultcase f where f.deleted = 0 and f.mapMgrId = #{mapMgrId}
+    </select>
+
+    <select id="faultCaseRecordCount" resultType="FaultCaseRecordCount">
+        select faultCaseName , recordCount from faultcase where deleted = 0
+    </select>
+
+    <select id="getTypeCount" resultType="TypeCountDto">
+        select count( faultCaseId ) as num from faultcase where deleted = 0
+    </select>
+    <select id="faultCaseByMapMgrId" parameterType="Long" resultType="FaultCase">
+        select * from faultcase where mapMgrId=#{mapMgrID} and deleted=0
+    </select>
+
+</mapper>

@@ -1,0 +1,30 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.ModelScoreDAO">
+
+    <insert id="addModelScore" parameterType="ModelScore" useGeneratedKeys="true" keyProperty="modelScoreId">
+        insert into modelscore( modelScoreId,stdModelId,userId,score ) values ( #{modelScoreId},#{stdModelId},#{userId},#{score} )
+    </insert>
+
+    <update id="updateModelScore" parameterType="ModelScore">
+        update modelscore set score = #{ score } where modelScoreId = #{ modelScoreId }
+    </update>
+
+    <select id="getModelScoreByUser" parameterType="ModelScore" resultType="ModelScore">
+        select * from modelscore where stdModelId = #{ stdModelId } and userId = #{ userId }
+    </select>
+
+    <select id="getAvgScore" parameterType="Long" resultType="Float">
+        select avg( score ) from modelscore , user as u where stdModelId = #{ stdModelId } and u.deleted = 0 and u.userId = modelscore.userId
+    </select>
+
+    <select id="getStdModelScoreList" parameterType="Long" resultType="ModelScore">
+        SELECT u.userName , score.score  from modelscore score , `user` u
+        where score.stdModelId = #{ stdModelId }  and u.deleted = 0  and score.userId = u.userId ORDER BY score.score DESC
+    </select>
+
+    <select id="getModelScoreInfo" resultType="StdModelInfo">
+        select MAX( score ) as maxScore, MIN( score ) as minScore,  AVG(score) as avgScore from modelscore , user as u where stdModelId = #{ stdModelId } and u.deleted = 0 and u.userId = modelscore.userId
+    </select>
+
+</mapper>

@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div id="app">
+    <div class="fyy_content">
+      <div class="query" style="background: #ffffff;">
+        <div style="width: 100%;">
+            <el-input
+                    type="textarea"
+                    :rows="5"
+                    placeholder="请输入内容"
+                    v-model="querySql">
+            </el-input>
+        </div>
+        <div style="margin-top: 20px;">
+            <el-date-picker
+                    v-model="timeValue"
+                    type="datetimerange"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    @change="generateSql"
+            >
+            </el-date-picker>
+            <el-button type="primary" @click="queryData" round>获取数据</el-button>
+        </div>
+    </div>
+    <div class="fields" style="width: 98%; display: block; min-height: inherit; padding: 10px 1%; margin-top: 10px; ">
+<!--        <a style="">字段列表</a>-->
+        <div style="width: 50%;overflow:aotu;height:480px">
+            <el-checkbox-group v-model="checkedFields" @change="handleCheckedFieldsChange">
+                <el-checkbox v-for="field in fields" :label="field" :key="field"
+                             style="display: block; padding-top: 10px;margin-left:10px">{{field}}<br></el-checkbox>
+            </el-checkbox-group>
+        </div>
+    </div>  
+    </div>
+</div>
+</body>
+</html>
+<script src="style/js/vue.js"></script>
+<script src="style/js/axios.min.js"></script>
+<script src="style/lib-master/index.js" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" href="style/lib-master/theme-chalk/index.css">
+<link rel="stylesheet" href="style/css/my.css">
+<script>
+    const app = new Vue({
+        el: "#app",
+        data() {
+
+            return {
+                //dataMgr
+                dataMgr: {},
+                //数据接口地址
+                dataUrl: '',
+                //当前容器名
+                containerName: "",
+                modelMgrId:"",
+                isStdModel:"",
+
+
+                timeValue: [],
+                //查询条件
+                queryCondition: {
+                    database: '',
+                    measurement: '',
+                    fields: [],
+                },
+                //sql语句
+                querySql: '',
+                data: [{
+                    label: "",
+                }],
+                defaultProps: {
+                    children: 'children',
+                    label: 'label'
+                },
+
+                //字段多选
+                fields: [],
+                //最全版本字段
+                wholeField: [],
+                checkedFields: [],
+                isIndeterminate: true,
+
+                //字段关键字查询
+                fieldKeyWord: '',
+            };
+        },
+        methods: {
+
+            //通过关键字显示字段
+            getFieldBykeyWord() {
+                if (this.fieldKeyWord != '') {
+                    this.fields = [];
+                    for (i = 0; i < this.wholeField.length; i++) {
+                        var field = this.wholeField[i]
+                        if (field.indexOf(this.fieldKeyWord) != -1) {
+                            this.fields.push(this.wholeField[i]);
+                        }
+                    }
+                } else {
+                    this.fields = this.wholeField;
+                }
+            },
+
+            //查询数据
+            queryData() {
+                if (this.querySql == '') {
+                    alert("查询语句为空")
+                } else {
+                    database = this.queryCondition.database;
+                    measurement = this.queryCondition.measurement;
+                    var condition = {}
+                    condition.querySql = this.querySql
+                    axios.post( '/base/record/queryData?databaseName=' + database + "&measurement=" + measurement + "&containerName=" + this.containerName + "&modelMgrId=" + this.modelMgrId + "&isStdModel=" + this.isStdModel, condition)
+                        .then(res => {
+                            if (res.data.code != 200) {
+                                alert("查询失败,请检查sql语句是否正确")
+                            } else {
+                                alert("查询成功\n文件保存为：" + res.data.data.fileName + "\n" + "时间截止到：" + res.data.data.lastTime )
+                            }
+                        })
+                        .catch(error => {
+
+                        })
+                }
+            },
+            generateSql() {
+                this.querySql = ''
+                fields = this.queryCondition.fields;
+                if (fields.length == 0) {
+                    return
+                }
+                queryFields = '';
+                for (i = 0; i < fields.length; i++) {
+                    if (i < fields.length - 1) {
+                        queryFields = queryFields + '"' + fields[i] + '", '
+                    } else {
+                        queryFields = queryFields + '"' + fields[i] + '"'
+                    }
+                }
+                timeCondition = ''
+                if (this.timeValue != null && this.timeValue[0] != undefined && this.timeValue[1] != undefined) {
+                    startTime = this.dateFormat('\'YYYY-mm-dd HH:MM:SS\'', this.timeValue[0])
+                    endTime = this.dateFormat('\'YYYY-mm-dd HH:MM:SS\'', this.timeValue[1])
+                    timeCondition = " WHERE time >= " + startTime + " AND time <= " + endTime;
+                }
+                this.querySql = 'SELECT '
+                    + queryFields
+                    + ' FROM '
+                    + '"' + this.queryCondition.measurement + '"'
+                    + timeCondition + " LIMIT 1"
+
+            },
+            handleCheckedFieldsChange(value) {
+                let checkedCount = value.length;
+                this.checkAll = checkedCount === this.fields.length;
+                this.isIndeterminate = checkedCount > 0 && checkedCount < this.fields.length;
+                this.queryCondition.fields = value
+                this.generateSql()
+            },
+
+            getFields(measurement) {
+                this.queryCondition.measurement = measurement
+                this.queryCondition.database = "DataMgr"
+                this.wholeField = []
+                this.fields = []
+                this.indeterminate = false
+                axios.get('/base/measurement/queryFields?databaseName=DataMgr' + "&measurement=" + measurement)
+                    .then(res => {
+                        for (i = 0; i < res.data.data.length; i++) {
+                            this.wholeField.push(res.data.data[i].name)
+                        }
+                        this.fields = this.wholeField
+                    })
+                    .catch(error => {
+                    })
+            },
+
+            dateFormat(fmt, date) {
+                let ret;
+                const opt = {
+                    "Y+": date.getFullYear().toString(),        // 年
+                    "m+": (date.getMonth() + 1).toString(),     // 月
+                    "d+": date.getDate().toString(),            // 日
+                    "H+": date.getHours().toString(),           // 时
+                    "M+": date.getMinutes().toString(),         // 分
+                    "S+": date.getSeconds().toString()          // 秒
+                    // 有其他格式化字符需求可以继续添加，必须转化成字符串
+                };
+                for (let k in opt) {
+                    ret = new RegExp("(" + k + ")").exec(fmt);
+                    if (ret) {
+                        fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+                    }
+                    ;
+                }
+                ;
+                return fmt;
+            },
+
+            // 获取第二层数表名
+            getDataMgr(dataMgrId) {
+                axios.get("/sf/datamgr/queryDataMgrById?dataMgrId=" + dataMgrId).then(res => {
+                    this.dataMgr = res.data.data
+                    this.getFields( this.dataMgr.secondMeasurement )
+                })
+            },
+            getCookieValue(name) {
+                var strcookie = document.cookie;//获取cookie字符串
+                var arrcookie = strcookie.split("; ");//分割
+                //遍历匹配
+                for (var i = 0; i < arrcookie.length; i++) {
+                    var arr = arrcookie[i].split("=");
+                    if (arr[0] == name) {
+                        return arr[1];
+                    }
+                }
+                return "";
+            },
+
+        },
+
+        async created() {
+            var dataMgrId = this.getCookieValue("dataMgrId");
+            this.containerName = this.getCookieValue("containerName");
+            this.modelMgrId = this.getCookieValue("modelMgrId");
+            this.isStdModel = this.getCookieValue("isStdModel");
+            this.getDataMgr(dataMgrId)
+        }
+    })
+</script>

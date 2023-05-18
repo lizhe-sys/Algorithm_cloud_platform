@@ -1,0 +1,76 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.KnowledgeMgrDAO">
+
+    <insert id="save" parameterType="KnowledgeMgr" useGeneratedKeys="true" keyProperty="knowledgeMgrId">
+        insert into knowledgemgr( knowledgeMgrId,dataMgrId,modelMgrId,faultPointName,faultDescription,faultStartTime,faultEndTime,knowledgeType,createTime,userId,deleted )
+            values ( #{knowledgeMgrId},#{dataMgrId},#{modelMgrId},#{faultPointName},#{faultDescription},#{faultStartTime},#{faultEndTime},#{knowledgeType},#{createTime},#{userId},#{deleted} )
+    </insert>
+
+    <update id="delete" parameterType="String">
+        update knowledgemgr set deleted = 1 where knowledgeMgrId = #{ knowledgeMgrId }
+    </update>
+
+    <update id="update"  parameterType="KnowledgeMgr">
+        UPDATE knowledgemgr
+        <trim prefix="set" suffixOverrides=",">
+
+            <if test="dataMgrId!=null">dataMgrId=#{dataMgrId},</if>
+            <if test="modelMgrId!=null">modelMgrId=#{modelMgrId},</if>
+            <if test="faultPointName!=null">faultPointName=#{faultPointName},</if>
+            <if test="faultDescription!=null">faultDescription=#{faultDescription},</if>
+            <if test="faultStartTime!=null">faultStartTime=#{faultStartTime},</if>
+            <if test="knowledgeType!=null">knowledgeType=#{knowledgeType},</if>
+
+        </trim>
+        WHERE knowledgeMgrId=#{knowledgeMgrId} and deleted = 0
+    </update>
+
+    <select id="getKnowledgeMgrById" parameterType="String" resultType="KnowledgeMgr">
+        select * from knowledgemgr where knowledgeMgrId=#{knowledgeMgrId} and deleted = 0
+    </select>
+
+
+    <select id="queryKnowledgeMgrList" resultType="KnowledgeMgrDto">
+        SELECT k.knowledgeMgrId,
+        d.inflxudbDatabase, d.inflxudbMeasurement , d.motorNo ,d.dataMgrName , d.dataMgrId,
+        m.modelName , m.modelMgrId,
+        k.faultPointName,k.faultDescription,k.faultStartTime,k.faultEndTime,k.knowledgeType,
+        u2.userName , k.createTime
+        FROM knowledgemgr as k , datamgr as d , modelmgr as m , `user` as u2
+        where
+            k.deleted = 0
+            and d.deleted = 0
+            and k.dataMgrId  = d.dataMgrId
+            and m.deleted = 0
+            and k.modelMgrId  = m.modelMgrId
+            and u2.deleted = 0
+            and k.userId = u2.userId
+    </select>
+
+    <select id="dimQueryKnowledgeMgr" parameterType="KnowledgeMgrDto" resultType="KnowledgeMgrDto">
+        SELECT k.knowledgeMgrId,
+        d.inflxudbDatabase, d.inflxudbMeasurement , d.motorNo ,d.dataMgrName , d.dataMgrId,
+        m.modelName , m.modelMgrId,
+        k.faultPointName,k.faultDescription,k.faultStartTime,k.faultEndTime,k.knowledgeType,
+        u2.userName , k.createTime
+        FROM knowledgemgr as k , datamgr as d , modelmgr as m , `user` as u2
+        where
+        k.deleted = 0
+        and d.deleted = 0
+        and k.dataMgrId  = d.dataMgrId
+        and m.deleted = 0
+        and k.modelMgrId  = m.modelMgrId
+        and u2.deleted = 0
+        and k.userId = u2.userId
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="modelName!=null">m.modelName like concat(concat("%",#{modelName}),"%") and</if>
+            <if test="dataMgrName!=null">d.dataMgrName like concat(concat("%",#{dataMgrName}),"%") and</if>
+            <if test="faultPointName!=null">k.faultPointName like concat(concat("%",#{faultPointName}),"%") and</if>
+            <if test="knowledgeType!=null">k.knowledgeType like concat(concat("%",#{knowledgeType}),"%") and</if>
+            <if test="createTime!=null">h.createTime like concat(concat("%",#{createTime}),"%") and</if>
+        </trim>
+    </select>
+
+
+</mapper>

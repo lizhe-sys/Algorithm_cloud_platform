@@ -1,0 +1,47 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.ModelResultDAO">
+
+    <!--  新增数据表  -->
+    <update id="createModelResultTable" parameterType="String">
+        CREATE TABLE `${modelResultTableName}` (
+        modelResultId bigint(20) NOT NULL AUTO_INCREMENT,
+        xTime  timestamp(4),
+        xFloat  double,
+        yValue  double,
+        PRIMARY KEY (modelResultId))
+    </update>
+
+    <!--  检查表是否存在  -->
+    <select id="checkTableIsExist" parameterType="String" resultType="int">
+        select count(*) from information_schema.TABLES where table_name = #{modelResultTableName}
+    </select>
+
+    <!--  批量插入数据  -->
+    <insert id="batchInsertData">
+        insert into ${mysqlTable}
+        <foreach collection="cols" item="col" open="(" close=")" separator=",">
+            `${col}`
+        </foreach>
+        values
+        <foreach collection="data" item="map" separator=",">
+            (
+            <foreach collection="map.entrySet()" item="value" index="key" separator=",">
+                #{value}
+            </foreach>
+            )
+        </foreach>
+    </insert>
+
+    <select id="getModelResultByModelId" parameterType="String" resultType="ModelResult">
+        select * from ${ modelResultTableName }
+    </select>
+
+    <select id="getModelResultByXtime" resultType="ModelResult">
+        select * from ${ modelResultTableName } where xTime &gt;= #{startTime} and xTime &lt;= #{endTime}
+    </select>
+
+    <select id="getModelResultByXFloat" resultType="ModelResult">
+        select * from ${ modelResultTableName } where xFloat &gt;= ${ start } and xFloat &lt;=  ${ end }
+    </select>
+</mapper>

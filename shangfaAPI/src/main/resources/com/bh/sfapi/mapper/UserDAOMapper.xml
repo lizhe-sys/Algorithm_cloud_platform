@@ -1,0 +1,65 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.UserDAO">
+
+    <!--  用户注册  -->
+    <insert id="save" parameterType="User" useGeneratedKeys="true" keyProperty="userId" >
+        insert into user values ( #{userId},#{userName},#{password},#{tel},#{email},#{role},#{deleted},#{fileName},#{skinType},#{containerAllocate},#{containerMemory},#{containerCpu},#{containerStatu})
+    </insert>
+
+    <select id="getUserByUserName" parameterType="String" resultType="User">
+        select * from user where userName = #{ userName } and deleted = 0
+    </select>
+
+
+    <select id="getUserByUserId" parameterType="Long" resultType="User">
+        select * from user where userId = #{ userId } and deleted = 0
+    </select>
+
+    <update id="updateUser"  parameterType="Long">
+        UPDATE user
+        <trim prefix="set" suffixOverrides=",">
+            <if test="userName!=null">userName=#{userName},</if>
+            <if test="password!=null">password=#{password},</if>
+            <if test="tel!=null">tel=#{tel},</if>
+            <if test="email!=null">email=#{email},</if>
+            <if test="role!=null">role=#{role},</if>
+            <if test="deleted!=null">deleted=#{deleted},</if>
+            <if test="fileName!=null">fileName=#{fileName},</if>
+            <if test="skinType!=null">skinType=#{skinType},</if>
+
+            <if test="containerAllocate!=null">containerAllocate=#{containerAllocate},</if>
+            <if test="containerMemory!=null">containerMemory=#{containerMemory},</if>
+            <if test="containerCpu!=null">containerCpu=#{containerCpu},</if>
+            <if test="containerStatu!=null">containerStatu=#{containerStatu},</if>
+        </trim>
+        WHERE userId=#{userId}
+    </update>
+
+    <select id="findAll" resultType="User">
+        select u.* , p.roleName from permission p , `user` u where u.deleted = 0  and p.deleted = 0 and  u.role = p.permissionId order by userId desc
+    </select>
+
+    <select id="login" parameterType="String" resultType="User">
+        select * from user where userName = #{userName} and password = #{password} and deleted = 0
+    </select>
+
+    <select id="getRoleCount" parameterType="Long" resultType="Integer">
+        select count( userId ) from user where deleted = 0 and role = #{ permissionId }
+    </select>
+    <select id="getNote" resultType="String">
+        select Note from note where Notetype=#{role}
+    </select>
+    <update id="insert" >
+        update note set note=#{string} , NoteType=#{role} where NoteId=#{role}
+    </update>
+    <select id="getRole" resultType="Role">
+        select permissionId, roleName from permission where deleted=0
+    </select>
+    <select id="getcountPermission" resultType="Long">
+        select count(*) from note
+    </select>
+    <insert id="add">
+        insert into note values (#{string},#{role},#{role})
+    </insert>
+</mapper>

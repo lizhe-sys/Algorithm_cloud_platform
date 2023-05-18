@@ -1,0 +1,65 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.PermissionDAO">
+    <insert id="addPermission" parameterType="Permission">
+        insert into permission values (
+            #{permissionId} , #{roleName} , #{permission_dataMgr} ,
+            #{permission_stdModel} , #{permission_modelMgr} , #{permission_map} ,
+            #{permission_health} , #{permission_faultCase} , #{permission_synthesis} ,
+            #{permission_type} , #{permission_startTime},#{permission_endTime},
+            #{deleted},#{sname_Chinese},#{sname_English}
+        )
+    </insert>
+
+    <select id="getPermissionByUserId" parameterType="Long" resultType="Permission">
+        select p.* from permission p , `user` u where u.userId = #{ userId } and u.deleted = 0  and p.deleted = 0 and  u.role = p.permissionId
+    </select>
+
+    <select id="getPermissionById" parameterType="Long" resultType="Permission">
+        select * from permission where permissionId = #{ permissionId } and deleted = 0
+    </select>
+
+    <update id="updatePermission" parameterType="Permission">
+        update permission
+        <trim prefix="set" suffixOverrides=",">
+            permission_dataMgr=#{permission_dataMgr},
+            permission_stdModel=#{permission_stdModel},
+            permission_modelMgr=#{permission_modelMgr},
+            permission_map=#{permission_map},
+            permission_health=#{permission_health},
+            permission_faultCase=#{permission_faultCase},
+            permission_synthesis=#{permission_synthesis},
+            permission_type=#{permission_type},
+            <if test="roleName!=null">roleName=#{roleName},</if>
+            <if test="permission_startTime!=null">permission_startTime=#{permission_startTime},</if>
+            <if test="permission_endTime!=null">permission_endTime=#{permission_endTime},</if>
+            <if test="sname_Chinese!=null">sname_chinese=#{sname_Chinese},</if>
+            <if test="sname_English!=null">sname_english=#{sname_English},</if>
+        </trim>
+        where permissionId = #{ permissionId }
+    </update>
+
+    <select id="permissionList" resultType="Permission">
+        SELECT p.* from permission p where deleted = 0 order by permissionId
+    </select>
+
+    <select id="getPermissionNameList" resultType="Permission">
+        SELECT p.permissionId , p.roleName from permission p where deleted = 0 order by permissionId
+    </select>
+
+    <select id="dimQueryPermissionList" resultType="Permission" parameterType="Permission">
+        SELECT p.* from permission p where deleted = 0
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="roleName!=null">roleName like concat(concat("%",#{roleName}),"%") and</if>
+        </trim>
+        order by permissionId
+    </select>
+
+    <select id="getPermissionByRoleName" parameterType="String" resultType="Permission">
+        select * from permission where deleted = 0 and roleName = #{ roleName }
+    </select>
+
+    <update id="deletePermission" parameterType="Long">
+        update permission set deleted = 1 where permissionId = #{ permissionId }
+    </update>
+</mapper>

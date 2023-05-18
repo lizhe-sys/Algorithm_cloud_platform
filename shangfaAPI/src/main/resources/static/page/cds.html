@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="zh-cn">
+<head styles>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/jquery.mloading.css">
+    <link rel="stylesheet" href="../css/my.css">
+    <link href="../css/zui.min.css" rel="stylesheet">
+    <style>
+
+        .splitter {
+            width: 100%;
+            height: 100px;
+            display: flex;
+        }
+
+        #separator {
+            cursor: col-resize;
+            background-color: #2C2C2C;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='30'><path d='M2 0 v30 M5 0 v30 M8 0 v30' fill='none' stroke='white'/></svg>");
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 10px;
+            height: 100%;
+
+            /* Prevent the browser's built-in drag from interfering */
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        #first {
+            background-color: #FFFFFF;
+            width: 40%;
+            height: 100%;
+            min-width: 10px;
+        }
+
+        #second {
+            background-color: #eee;
+            width: 60%;
+            height: 100%;
+            min-width: 10px;
+        }
+
+    </style>
+</head>
+<body style="position:relative; width:100%; height:100%;margin: 0">
+<div id="mask" style="position:absolute; left:0; top:0; background:#000000;opacity: 0; width:100%; height:100%" hidden>
+</div>
+<div id="topbar">
+<!--    <button type="button"-->
+<!--            style="height: 20px;margin-left: 20px;font-size: 1px;padding-left: 20px;padding-top: 0;padding-right: 20px;"-->
+<!--            class="btn btn-warning" id="exit">退出BUCT OJ-->
+<!--    </button>-->
+<!--    <span style="color: #FFFFFF;margin-left: 6px;font-size: 13px">已用时间:<span id="used" style="margin-left: 3px"></span></span>-->
+<!--    <button type="button"-->
+<!--            style="height: 20px;margin-left: 20px;font-size: 1px;padding-left: 20px;padding-top: 0;padding-right: 20px;"-->
+<!--            class="btn btn-primary" data-position="100px" data-toggle="modal" data-target="#myModal">续约-->
+<!--    </button>-->
+<!--    <button type="button"-->
+<!--            style="height: 20px;font-size: 1px;padding-left: 20px;padding-top: 0;padding-right: 20px;"-->
+<!--            class="btn btn-primary" data-position="100px" data-toggle="modal" data-target="#myModal2">续约是啥？-->
+<!--    </button>-->
+</div>
+
+<div class="modal fade" id="myModal2">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                        class="sr-only">关闭</span></button>
+                <h4 class="modal-title">续约是啥</h4>
+            </div>
+            <div class="modal-body">
+                <p>为了确保用户都有公平的使用体验，本系统有两个防呆机制：</p>
+                <p>1、本页面关闭超过15分钟，将会自动回收资源。</p>
+                <p>2、单次使用超过3个小时，也会自动回收资源。但是为了保证长时间编程的用户能够持续使用，用户可以在超时前点击“续约”按钮，即可重置使用时间，继续使用3个小时。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span
+                        class="sr-only">关闭</span></button>
+                <h4 class="modal-title">请输入验证码进行续约</h4>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 16px">已用时间到达3小时时会强制退出，续约可清零使用时间</p>
+                <img id="capImage" style="margin-bottom: 16px" style="vertical-align: top;cursor: pointer;"
+                     onclick="this.src='/captcha/image/'+Math.ceil(Math.random()*100)">
+                <br/>
+                <span class="input-desc">验证码</span>
+                <input id="inputCode" type="text" name="captcha" maxlength="4" minlength="4" placeholder="请输入验证码"
+                       required="" id="id_captcha">
+                <br/>
+                <button id="buttonStand" class="btn btn-primary" style="margin-top: 16px" type="submit">验证</button>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="splitter" style="width: 100%;height: calc(100% - 25px);margin: 0;">
+    <div id="first">
+        <iframe style="width: 100%;height: 100%;margin: 0"
+                src="http://101.37.34.176:8989/bill/billlist.html"></iframe>
+    </div>
+    <div id="separator"></div>
+    <div id="second">
+        <iframe name="cdr" style="margin: 0;padding: 0;width: 100%;height: 100%;border: none"
+                id="cdr" src="http://101.37.34.176:8080/?folder=/home/coder/code"></iframe>
+    </div>
+</div>
+</body>
+</html>

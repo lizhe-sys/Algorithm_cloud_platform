@@ -1,0 +1,167 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.DataMgrDAO">
+
+    <update id="updateDataMgr"  parameterType="Long">
+        UPDATE datamgr
+        <trim prefix="set" suffixOverrides=",">
+            <if test="motorType!=null">motorType=#{motorType},</if>
+            <if test="inflxudbDatabase!=null">inflxudbDatabase=#{inflxudbDatabase},</if>
+            <if test="inflxudbMeasurement!=null">inflxudbMeasurement=#{inflxudbMeasurement},</if>
+            <if test="motorNo!=null">motorNo=#{motorNo},</if>
+            <if test="userId!=null">userId=#{userId},</if>
+            <if test="secondMeasurement!=null">secondMeasurement=#{secondMeasurement},</if>
+            <if test="dataMgrName!=null">dataMgrName=#{dataMgrName},</if>
+            <if test="dataMgrDescription!=null">dataMgrDescription=#{dataMgrDescription},</if>
+            <if test="filePath!=null">filePath=#{filePath},</if>
+            <if test="fileId!=null">fileId=#{fileId},</if>
+            <if test="startTime!=null">startTime=#{startTime},</if>
+            <if test="endTime!=null">endTime=#{endTime},</if>
+            <if test="createTime!=null">createTime=#{createTime},</if>
+            <if test="finished!=0">finished=#{finished},</if>
+            <if test="deleted!=null">deleted=#{deleted},</if>
+            <if test="dataMapCount!=null">dataMapCount=#{dataMapCount},</if>
+        </trim>
+        WHERE dataMgrId=#{dataMgrId}
+    </update>
+
+    <select id="dimQueryDataMgr" parameterType="DataMgr" resultType="DataMgr">
+        select datamgr.*  , user.userName as userName from datamgr , user  where  datamgr.deleted = 0 and user.deleted = 0 and datamgr.userId = user.userId
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="dataMgrId!=null">dataMgrId like concat(concat("%",#{dataMgrId}),"%") and</if>
+            <if test="motorType!=null">motorType like concat(concat("%",#{motorType}),"%") and</if>
+            <if test="inflxudbDatabase!=null">inflxudbDatabase like concat(concat("%",#{inflxudbDatabase}),"%") and</if>
+            <if test="inflxudbMeasurement!=null">inflxudbMeasurement like concat(concat("%",#{inflxudbMeasurement}),"%") and</if>
+            <if test="motorNo!=null">motorNo like concat(concat("%",#{motorNo}),"%") and</if>
+            <if test="dataMgrName!=null">dataMgrName like concat(concat("%",#{dataMgrName}),"%") and</if>
+            <if test="dataMgrDescription!=null">dataMgrDescription like  concat(concat("%",#{dataMgrDescription}),"%") and</if>
+            <if test="startTime!=null">startTime &gt;= #{startTime} and</if>
+            <if test="endTime!=null">endTime &lt;= #{endTime} and</if>
+        </trim>
+        order by datamgr.dataMgrId desc
+    </select>
+
+    <!--  新增数据表  -->
+    <update id="createDataTable" parameterType="String">
+        CREATE TABLE ${secondMeasurement} (
+        dataId bigint(20) NOT NULL AUTO_INCREMENT,
+        time  timestamp(4),
+        <foreach collection="fields" index="index" item="item">
+            `${item}` double,
+        </foreach>
+        PRIMARY KEY (dataId))
+    </update>
+
+    <!--  检查表是否存在  -->
+    <select id="checkTableIsExist" parameterType="String" resultType="int">
+        select count(*) from information_schema.TABLES where table_name = #{secondMeasurement}
+    </select>
+
+    <!--  根据mysql表名查询datamgr记录  -->
+    <select id="queryDataMgrByMySqlTable" parameterType="String" resultType="DataMgr">
+        select * from datamgr where secondMeasurement = #{secondMeasurement} and deleted = 0
+    </select>
+
+
+    <!--  根据id查询datamgr记录  -->
+    <select id="queryDataMgrById" parameterType="Long" resultType="DataMgr">
+        select * from datamgr where dataMgrId = #{dataMgrId} and deleted = 0
+    </select>
+
+    <!--  根据id查询datamgr记录  -->
+    <select id="queryDataMgrByModelMgrId" parameterType="Long" resultType="DataMgr">
+        select * from datamgr where modelMgrId = #{modelMgrId} and deleted = 0
+    </select>
+
+
+    <!--    datamgr 和 user联表查询，要获取到列表数据-->
+    <select id="queryDataMgrList" resultType="DataMgr">
+        select datamgr.*  , user.userName as userName from datamgr , user  where  datamgr.deleted = 0 and user.deleted = 0 and datamgr.userId = user.userId order by datamgr.dataMgrId desc
+    </select>
+
+    <select id="queryDataTypeDataMgrList" resultType="DataMgr">
+        select datamgr.*  , user.userName as userName from datamgr , user  where  datamgr.deleted = 0 and user.deleted = 0 and datamgr.userId = user.userId and dataType = 0 order by datamgr.dataMgrId desc
+    </select>
+    <select id="queryDataMgrByuserId" parameterType="Long" resultType="DataMgr">
+        select * from datamgr where userId=#{userId} and deleted=0
+    </select>
+    <!--  查询表的字段列表  -->
+    <select id="queryFileds" parameterType="String" resultType="String">
+        select column_name from information_schema.columns  where table_name = #{secondMeasurement} and table_schema= #{mysqlDatabase}
+    </select>
+    <!--  查询未导入完成的数据管理记录  -->
+    <select id="queryDataMgrUnFinishedList" resultType="DataMgr">
+        select * from datamgr where  datamgr.deleted = 0 and datamgr.finished = 0 and datamgr.dataType = 0
+    </select>
+
+    <!--  增加datamgr记录  -->
+    <insert id="save" parameterType="DataMgr">
+        insert into datamgr values ( #{dataMgrId}, #{motorType}, #{inflxudbDatabase},#{inflxudbMeasurement},#{motorNo},#{userId},#{secondMeasurement},#{dataMgrName},#{dataMgrDescription},#{filePath},#{startTime},#{endTime},#{createTime},#{finished},#{deleted} ,#{ firstField },#{ fileId }, #{ dataType } ,#{ dataMapCount } )
+    </insert>
+    <select id="getid" parameterType="Long" resultType="Long">
+        select dataMgrId from datamgr where userId=#{dataMgr.getUserId()} order by dataMgrId desc limit 1
+    </select>
+
+    <!--  增加试车数据记录  -->
+    <insert id="batchInsertData">
+        insert into ${secondMeasurement}
+        <foreach collection="cols" item="col" open="(" close=")" separator=",">
+            `${col}`
+        </foreach>
+        values
+        <foreach collection="data" item="map" separator=",">
+            (
+            <foreach collection="map.entrySet()" item="value" index="key" separator=",">
+                #{value}
+            </foreach>
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryDataMgrByName" parameterType="String" resultType="DataMgr">
+        select * from datamgr where dataMgrName = #{dataMgrName} and deleted = 0
+    </select>
+
+    <insert id="addOtherTypeDataMgr">
+        insert into datamgr( dataMgrId , motorType, userId, dataMgrName, dataMgrDescription, createTime, finished,deleted,dataType ) values ( #{dataMgrId} , #{motorType}, #{userId}, #{dataMgrName}, #{dataMgrDescription}, #{createTime}, #{finished}, #{deleted}, #{dataType} )
+    </insert>
+
+    <select id="getTypeCount" resultType="TypeCountDto">
+        SELECT dataType as type , COUNT( dataMgrId ) as num  from datamgr where deleted = 0 GROUP BY dataType
+    </select>
+
+    <select id="dataMgrMapCount" resultType="DataMgrMapCount">
+        SELECT dataMgrName , dataMapCount from datamgr where deleted = 0 and dataType = 0
+    </select>
+
+    <select id="getDataMgrTimeList" resultType="DataMgr">
+        select startTime , EndTime from datamgr where deleted = 0 and dataType = 0 AND finished = 1 and startTime > 0 and endTime > 0
+    </select>
+
+    <select id="dimQueryDataMgrTimeList" resultType="DataMgr">
+        select startTime , EndTime from datamgr where deleted = 0 and dataType = 0 AND finished = 1 and startTime > 0 and endTime > 0
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="inflxudbDatabase!=null">inflxudbDatabase like concat(concat("%",#{inflxudbDatabase}),"%") and</if>
+            <if test="inflxudbMeasurement!=null">inflxudbMeasurement like concat(concat("%",#{inflxudbMeasurement}),"%") and</if>
+            <if test="motorNo!=null">motorNo like concat(concat("%",#{motorNo}),"%") and</if>
+        </trim>
+
+    </select>
+
+    <select id="getInfluxdbDataBase" resultType="String">
+        SELECT DISTINCT( inflxudbDatabase )  from datamgr where deleted = 0 and inflxudbDatabase is NOT NULL
+    </select>
+
+    <select id="getInfluxdbMeasurement" resultType="String">
+        SELECT DISTINCT( inflxudbMeasurement )  from datamgr where deleted = 0 and inflxudbMeasurement is NOT NULL
+    </select>
+
+    <select id="getInfluxdbMotorNo" resultType="String">
+        SELECT DISTINCT( motorNo )  from datamgr where deleted = 0 and motorNo  is NOT NULL
+    </select>
+
+    <update id="deleteTest2">
+        UPDATE datamgr set deleted = 1 where dataMgrName like concat("验证-","%")
+    </update>
+
+</mapper>

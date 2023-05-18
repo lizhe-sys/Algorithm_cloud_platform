@@ -1,0 +1,30 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.FirstPageDAO">
+
+    <select id="firstPageInfo" resultType="FirstPage">
+        select * from firstpage;
+    </select>
+
+    <update id="updatefirstPage" parameterType="FirstPage">
+        UPDATE firstpage
+        <trim prefix="set" suffixOverrides=",">
+            <if test="dataMgr_data!=null">dataMgr_data=#{dataMgr_data},</if>
+            <if test="dataMgr_data_size!=null">dataMgr_data_size=#{dataMgr_data_size},</if>
+            <if test="dataMgr_data_time!=null">dataMgr_data_time=#{dataMgr_data_time},</if>
+            <if test="dataMgr_video!=null">dataMgr_video=#{dataMgr_video},</if>
+            <if test="dataMgr_picture!=null">dataMgr_picture=#{dataMgr_picture},</if>
+            <if test="dataMgr_other!=null">dataMgr_other=#{dataMgr_other},</if>
+            <if test="stdModel_online!=null">stdModel_online=#{stdModel_online},</if>
+            <if test="stdModel_package!=null">stdModel_package=#{stdModel_package},</if>
+            <if test="knowledge_file!=null">knowledge_file=#{knowledge_file},</if>
+            <if test="knowledge_video!=null">knowledge_video=#{knowledge_video},</if>
+            <if test="knowledge_picture!=null">knowledge_picture=#{knowledge_picture},</if>
+            <if test="knowledge_faultcase!=null">knowledge_faultcase=#{knowledge_faultcase},</if>
+            <if test="map_data!=null">map_data=#{map_data},</if>
+            <if test="map_model!=null">map_model=#{map_model},</if>
+            <if test="health_count!=null">health_count=#{health_count},</if>
+        </trim>
+    </update>
+
+</mapper>

@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div id="app">
+
+    <div class="block">
+        <el-select v-model="MLParams.datasetId" placeholder="数据集选择">
+            <el-option
+                    v-for="item in datasets"
+                    :key="item.name"
+                    :label="item.name"
+                    :value="item.id">
+            </el-option>
+        </el-select>
+    </div>
+    <br>
+    <div class="block">
+        <el-select v-model="MLParams.modeId" placeholder="模型选择">
+            <el-option
+                    v-for="item in modes"
+                    :key="item.name"
+                    :label="item.name"
+                    :value="item.id">
+            </el-option>
+        </el-select>
+    </div>
+    <br>
+    <div class="block">
+        <a>测试集大小</a>
+        <br/>
+        <el-input v-model="MLParams.test_size" placeholder="范围：0到1.0"  class="input"></el-input>
+        <br/>
+        <a>随机种子</a>
+        <br/>
+        <el-input v-model="MLParams.random_state" placeholder="任意整数"  class="input"></el-input>
+    </div>
+    <br>
+    <button type="button" @click="submit()">提 交</button>&emsp;
+    <button type="button" @click="downloadPdf()">下载pdf</button>&emsp;
+</div>
+</body>
+</html>
+<script src="../online/style/js/vue.js"></script>
+<script src="../online/style/js/axios.min.js"></script>
+<script src="../online/style/lib-master/index.js" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" href="../online/style/lib-master/theme-chalk/index.css">
+<script>
+    const app = new Vue({
+        el: "#app",
+        data: {
+            conId: '',
+            addr:"",
+            MLParams:{},
+            datasets:[
+                {
+                    id:'iris',
+                    name:"鸢尾花",
+                },
+                {
+                    id:'boston_house_prices',
+                    name:'波士顿房价'
+                },
+                {
+                    id:'breast_cancer',
+                    name:'乳腺癌'
+                },
+                {
+                    id:'wine_data',
+                    name:'葡萄酒'
+                },
+                {
+                    id:'linnerud_exercise',
+                    name:'体能训练'
+                }
+            ],
+            modes:[
+                {
+                    id:'LogisticRegression',
+                    name:' 线性回归(LogisticRegression)'
+                },
+                {
+                    id:'LinearRegression',
+                    name:' 线性回归(LinearRegression)'
+                },
+                {
+
+                    id:'LinearDiscriminantAnalysis',
+                    name:'线性判别分析(LDA)'
+                },
+                {
+
+                    id:'KNeighborsClassifier',
+                    name:'K近邻(KNN)'
+                },
+                {
+                    id:'DecisionTreeClassifier',
+                    name:'分类与回归树(CART)'
+                },
+                {
+                    id:'GaussianNB',
+                    name:'贝叶斯分类器(NB)'
+                },
+                {
+                    id:'SVC',
+                    name:'支持向量机(SVM)'
+                }
+            ]
+
+        },
+        methods: {
+            downloadPdf(){
+                axios.get(this.addr + 'online/zxpt/getPdfFromContainer/' + this.conId  )
+                    .then( res=>{
+                        console.log( res.data.data )
+                        alert( res.data.data )
+                    })
+                    .catch(error=>{
+                        console.log( error )
+                    })
+            },
+
+            submit() {
+                console.log( this.MLParams )
+                axios.post(this.addr + 'online/zxpt/getMLParams' , this.MLParams )
+                    .then( res=>{
+                        // console.log( res )
+                    })
+                    .catch(error=>{
+                        console.log( error )
+                    })
+            },
+            getCookieValue(name) {
+                var strcookie = document.cookie;//获取cookie字符串
+                var arrcookie = strcookie.split("; ");//分割
+                //遍历匹配
+                for (var i = 0; i < arrcookie.length; i++) {
+                    var arr = arrcookie[i].split("=");
+                    if (arr[0] == name) {
+                        return arr[1];
+                    }
+                }
+                return "";
+            },
+            getAddr( ){
+                axios.get('./config.json')
+                    .then( res=> {
+                        this.addr = res.data.addr
+                    })
+                    .catch( error=>{
+
+                    })
+            }
+
+        },
+        created() {
+            this.getAddr()
+            this.conId = this.getCookieValue('jupyterConId')
+            this.MLParams.conId = this.conId
+        }
+    })
+</script>
+
+<style type="text/css">
+    .input{
+
+        width: 220px;
+        position: relative;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+</style>

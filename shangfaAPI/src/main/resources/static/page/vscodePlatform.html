@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-cn" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head styles>
+    <meta charset="UTF-8">
+    <title>在线算法平台</title>
+    <link rel="stylesheet" href="../style/css/jquery.mloading.css">
+    <link rel="stylesheet" href="../style/css/my.css">
+    <link href="../style/css/zui.min.css" rel="stylesheet">
+    <style>
+
+        .splitter {
+            width: 100%;
+            height: 100px;
+            display: flex;
+        }
+
+        #separator {
+            cursor: col-resize;
+            background-color: #2C2C2C;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='30'><path d='M2 0 v30 M5 0 v30 M8 0 v30' fill='none' stroke='white'/></svg>");
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 10px;
+            height: 100%;
+
+            /* Prevent the browser's built-in drag from interfering */
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        #first {
+            background-color: #FFFFFF;
+            width: 40%;
+            height: 100%;
+            min-width: 10px;
+        }
+
+        #second {
+            background-color: #eee;
+            width: 60%;
+            height: 100%;
+            min-width: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div id="app" style="position:relative; width:100%; height:100%;margin: 0">
+    <div id="mask" style="position:absolute; left:0; top:0; background:#000000;opacity: 0; width:100%; height:100%"
+         hidden>
+    </div>
+    <div id="topbar">
+            <button type="button"
+                    style="height: 20px;margin-left: 20px;font-size: 1px;padding-left: 20px;padding-top: 0;padding-right: 20px;"
+                    class="btn btn-warning" id="exit" @click="exitLogin()">退出平台
+            </button>
+    </div>
+    <div class="splitter" style="width: 100%;height: calc(100% - 25px);margin: 0;">
+        <div id="first">
+            <iframe style="width: 100%;height: 100%;margin: 0"
+                    src="../data.html"></iframe>
+        </div>
+        <div id="separator"></div>
+        <div id="second">
+
+            <iframe name="code" style="margin: 0;padding: 0;width: 100%;height: 100%;border: none"
+                    id="code" v-bind:src="url"></iframe>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+<script src="../style/js/vue.js"></script>
+<script src="../style/js/axios.min.js"></script>
+<script src="../style/lib-master/index.js" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" href="../style/lib-master/theme-chalk/index.css">
+<script>
+    const app = new Vue({
+        el: "#app",
+        data: {
+            conId: '9521',
+            url: '',
+            container: false
+        },
+        methods: {
+
+            exitLogin(){
+                // console.log( 123 )
+                axios.get(this.addr + 'online/zxpt/exitLogin')
+                    .then( res=> {
+                        location.href = this.addr + "online/login.html"
+                    })
+                    .catch( error=>{
+
+                    })
+            },
+            getCookieValue(name) {
+                var strcookie = document.cookie;//获取cookie字符串
+                var arrcookie = strcookie.split("; ");//分割
+                //遍历匹配
+                for (var i = 0; i < arrcookie.length; i++) {
+                    var arr = arrcookie[i].split("=");
+                    if (arr[0] == name) {
+                        return arr[1];
+                    }
+                }
+                return "";
+            },
+            dragElement(direction) {
+                var md; // remember mouse down info
+                const first = document.getElementById("first");
+                const second = document.getElementById("second");
+                const separator = document.getElementById("separator")
+                separator.onmousedown = function onMouseDown(e) {
+                    var mask = document.getElementById("mask")
+                    mask.hidden = false
+                    // console.log("mouse down: " + e.clientX);
+                    md = {
+                        e,
+                        offsetLeft: separator.offsetLeft,
+                        offsetTop: separator.offsetTop,
+                        firstWidth: first.offsetWidth,
+                        secondWidth: second.offsetWidth
+                    };
+
+                    document.onmousemove = onMouseMove;
+                    document.onmouseup = () => {
+                        //console.log("mouse up");
+                        var mask = document.getElementById("mask")
+                        mask.hidden = true
+                        document.onmousemove = document.onmouseup = null;
+                    }
+                }
+
+                function onMouseMove(e) {
+                    //console.log("mouse move: " + e.clientX);
+
+                    var delta = {
+                        x: e.clientX - md.e.clientX,
+                        y: e.clientY - md.e.clientY
+                    };
+
+                    if (direction === "H") // Horizontal
+                    {
+                        // Prevent negative-sized elements
+                        delta.x = Math.min(Math.max(delta.x, -md.firstWidth),
+                            md.secondWidth);
+
+                        separator.style.left = md.offsetLeft + delta.x + "px";
+                        first.style.width = (md.firstWidth + delta.x) + "px";
+                        second.style.width = (md.secondWidth - delta.x) + "px";
+                    }
+                }
+            },
+            getAddr( ){
+                axios.get('./config.json')
+                    .then( res=> {
+                        this.addr = res.data.addr
+                        this.url = this.addr + "vscode/?folder=/home/coder/code"
+                    })
+                    .catch( error=>{
+
+                    })
+            }
+
+
+        },
+        created() {
+            this.getAddr();
+            // this.conId = this.getCookieValue( 'jupyterConId' )
+            // if( this.conId == '' ){
+            //     // alert('请先登录')
+            //     location.href = "http://127.0.0.1:9091/online/login.html"
+            //     return
+            // }
+            // this.url = 'http://127.0.0.1:9091/' + this.conId + '/?folder=/home/coder/code'
+            // this.url = 'http://127.0.0.1:9091/jupyter'
+        },
+        mounted() {
+            this.dragElement("H")
+        }
+    })
+</script>

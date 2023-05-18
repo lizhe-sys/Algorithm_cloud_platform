@@ -1,0 +1,117 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block head_js %}
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+{% endblock %}
+{% block css %}
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap-theme.min.css' %}" rel="stylesheet">
+{% endblock %}
+{% block body %}
+    <body>
+        <div class="row" style="margin-top: 100px">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="form-group">
+                        <label>用户名:</label>
+                        <input type="text" disabled id="id_username" class="form-control" value="{{ username }}">
+                </div>
+                <div class="form-group">
+                    <label>当前排位:</label>
+                    <input type="text" disabled id="id_rank" class="form-control" value="正在获取信息">
+                </div>
+                <button id="id_srk" class="btn-sm btn-default">开始排队</button>
+                <button id="id_erk" class="btn-sm btn-default" disabled>退出排队/结束使用</button>
+                <button disabled id="id_enterCDS" class="btn-sm btn-default">进入在线vscode</button>
+                <button id="id_logout" class="btn-sm btn-default">退出登录(不会关闭容器)</button>
+                </div>
+            </div>
+        </div>
+    </body>
+{% endblock %}
+{% block body_js %}
+    <script>
+    let statu = {
+        rankStatu : null,
+        watcher:null
+    }
+    Object.defineProperty(statu,"rankStatu",{
+        get:function() {
+            return rankStatu
+        },
+        set(v) {
+            rankStatu = v
+            if (v){
+                $("#id_srk").attr("disabled",true)
+                $("#id_erk").removeAttr("disabled")
+            }else{
+                $("#id_rank").val("您尚未排队")
+                $("#id_erk").attr("disabled",true)
+                $("#id_srk").removeAttr("disabled")
+            }
+        }
+    })
+    function getorder(){
+        axios.get(prefix+"getorder").then((res,rej)=>{
+            console.log(res)
+        if (res.status===200&&res.data.result===1){
+            if (res.data.hasOwnProperty("order")&&res.data.order!=null){
+                console.log(res)
+                statu.rankStatu = true
+                $("#id_rank").val(res.data.order)
+                if(res.data.order===0){
+                    $("#id_enterCDS").removeAttr("disabled")
+                }
+            }else{
+                statu.rankStatu = false
+            }
+        }else{
+            $("#id_rank").val("位置获取异常")
+            console.log(res,"获取错误")
+        }
+    }).catch(err=>{
+        $("#id_rank").val("位置获取异常")
+        console.log(err)
+        })
+    }
+    getorder()
+    function startRank() {
+        $("#id_srk").attr("disabled",true)
+        $("#id_erk").removeAttr("disabled")
+        $("#id_rank").val("请等待")
+        timer2 = null
+        axios.get(prefix+"insertuser").then((res,rej)=>{
+            if (res.data.result===1){
+                if (statu.watcher){
+                    clearInterval(statu.watcher)
+                }
+                statu.watcher = setInterval(()=>{
+                    getorder()
+                },5*1000)
+            }else{
+                $("#id_rank").val("排队失败")
+                console.log(res)
+            }
+        }).catch(err=>{
+            $("#id_rank").val("排队失败")
+            console.log(err)
+        })
+    }
+    function endRank() {
+        axios.get(prefix+"removeuser").then(res=>{
+            clearInterval(statu.watcher)
+            statu.watcher = null
+            statu.rankStatu = false
+            $("#id_enterCDS").attr("disabled",true)
+        })
+
+    }
+    $("#id_srk").click(startRank)
+    $("#id_erk").click(endRank)
+    $("#id_enterCDS").click(()=>{
+        window.location.href = "/frontend/cds"
+    })
+    $("#id_logout").click(()=>{
+        window.location.href = "/frontend/logout"
+    })
+    </script>
+{% endblock %}

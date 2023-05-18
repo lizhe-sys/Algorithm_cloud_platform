@@ -1,0 +1,17 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.BaseDAO">
+
+<!--    &lt;!&ndash;  查询realtime表所有的记录  &ndash;&gt;-->
+<!--   <select id="findAll" resultType="RealTime">-->
+<!--        select * from realtime-->
+<!--    </select>-->
+
+<!--    &lt;!&ndash;  查询当前最新记录 &ndash;&gt;-->
+<!--    <select id="queryRealTimeRecord" parameterType="String"  resultType="RealTime">-->
+<!--        select * from realtime where influxdb_database=#{influxdb_database} order by time desc limit 1-->
+<!--    </select>-->
+
+
+
+</mapper>

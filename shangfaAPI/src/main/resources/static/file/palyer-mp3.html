@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>播放音频资料</title>
+        <script type="text/javascript" src="./lib/jquery-3.3.1.min.js"></script>
+        <script type="text/javascript" src="./js/constant/urls.js"></script>
+
+    </head>
+    <body style="display:flex;position: relative">
+    <div id="myid"  style="position:absolute;left:50%;transform: translateX(-50%);display: inline-block;vertical-align: middle;align-self: center"  >
+
+    </div>
+    </body>
+    <script type="text/javascript">
+        let afterUrl = window.location.search.substring(1);
+        let afterEqual =urls.server+'/file/videoPlay?fileId='+ afterUrl.substring(afterUrl.search('=')+1).toUpperCase();
+        let myitem = document.getElementById("myid");
+        myitem.innerHTML=
+            ' <audio preload="auto" controls  id="audio">' +
+            '                     <source   src="'+afterEqual+'"/>' +
+            '                     <source src="audio.ogg" />' +
+            '                     <source src="audio.wav" />' +
+            '                 </audio>'
+    </script>
+</html>

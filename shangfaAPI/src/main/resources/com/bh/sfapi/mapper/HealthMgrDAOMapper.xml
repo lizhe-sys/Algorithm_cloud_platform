@@ -1,0 +1,166 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.HealthMgrDAO">
+
+    <insert id="save" parameterType="HealthMgr" useGeneratedKeys="true" keyProperty="healthMgrId">
+        insert into healthmgr( healthMgrId,healthMgrName,modelMgrId,dataMgrId,userId,createTime,deleted,starttime ) values ( #{healthMgrId},#{healthMgrName},#{modelMgrId},#{dataMgrId},#{userId},#{createTime},#{deleted} ,#{startTime})
+    </insert>
+
+    <update id="update"  parameterType="Long">
+        UPDATE healthmgr
+        <trim prefix="set" suffixOverrides=",">
+            <if test="healthMgrName!=null">healthMgrName=#{healthMgrName}</if>
+            <if test="dataMgrId!=null">dataMgrId=#{dataMgrId},</if>
+            <if test="modelMgrId!=null">modelMgrId=#{modelMgrId},</if>
+            <if test="userId!=null">userId=#{userId},</if>
+            <if test="deleted!=null">deleted=#{deleted},</if>
+        </trim>
+        WHERE healthMgrId=#{healthMgrId}
+    </update>
+    <update id="changeData" parameterType="Long">
+        UPDATE mapmgr set dataMgrId=#{dataMgrId} where dataMgrId=#{olddataMgrId}
+    </update>
+    <update id="updatemap" parameterType="Long">
+        UPDATE healthmgr set dataMgrId=#{dataMgrId} where dataMgrId=#{olddataMgrId}
+    </update>
+
+    <select id="getHealthMgrById" parameterType="String" resultType="HealthMgr">
+        select * from healthmgr where healthMgrId=#{healthMgrId} and deleted = 0
+    </select>
+
+    <select id="getHealthMgrByName" parameterType="String" resultType="HealthMgr">
+        select * from healthmgr where healthMgrName=#{healthMgrName} and deleted = 0
+    </select>
+
+    <select id="getHealthMgrByModelMgrId" parameterType="Long" resultType="HealthMgr">
+        select * from healthmgr where modelMgrId=#{modelMgrId} and deleted = 0
+    </select>
+
+    <select id="getHealthMgrByUserId" parameterType="Long" resultType="HealthMgr">
+        select * from healthmgr where userId=#{userId} and deleted = 0  order by healthMgrId desc limit 1
+    </select>
+
+    <select id="getHealthMgrList" resultType="HealthMgrDto">
+        select res2.* ,  d.inflxudbDatabase,  d.inflxudbMeasurement , d.motorNo ,d.dataMgrName
+        from
+        ( select res1.healthMgrId , res1.healthMgrName, res1.userId, res1.createTime , res1.userName , res1.dataMgrId, res1.starttime, m.modelMgrId ,m.modelName
+        from
+        ( select h.healthMgrId ,  h.healthMgrName,h.userId , h.createTime , h.modelMgrId , h.dataMgrId , u.userName , h.starttime
+        from
+        healthmgr h , `user` u  where h.deleted  = 0 and u.deleted  = 0 and h.userId  = u.userId  ) as res1
+        left JOIN
+        modelmgr m
+        on m.deleted  = 0 and res1.modelMgrId = m.modelMgrId
+        ) as res2 , datamgr d
+        where  res2.dataMgrId = d.dataMgrId
+        order by res2.healthMgrId desc
+    </select>
+
+    <select id="getHealthMgrDtoById" resultType="HealthMgrDto">
+        select res2.* ,  d.inflxudbDatabase,  d.inflxudbMeasurement , d.motorNo ,d.dataMgrName
+        from
+        ( select res1.healthMgrId , res1.healthMgrName, res1.userId, res1.createTime , res1.userName , res1.dataMgrId, m.modelMgrId ,m.modelName
+        from
+        ( select h.healthMgrId ,  h.healthMgrName,h.userId , h.createTime , h.modelMgrId , h.dataMgrId , u.userName
+        from
+        healthmgr h , `user` u  where h.healthMgrId = #{healthMgrId} and h.deleted  = 0 and u.deleted  = 0 and h.userId  = u.userId  ) as res1
+        left JOIN
+        modelmgr m
+        on m.deleted  = 0 and res1.modelMgrId = m.modelMgrId
+        ) as res2 , datamgr d
+        where   res2.dataMgrId = d.dataMgrId
+        order by res2.healthMgrId desc
+    </select>
+
+    <select id="dimQueryHealthMgr" parameterType="HealthMgrDto" resultType="HealthMgrDto">
+        select res3.*
+        from
+        (
+        select res2.* ,  d.inflxudbDatabase,  d.inflxudbMeasurement , d.motorNo ,d.dataMgrName
+        from
+        (
+            select res1.healthMgrId , res1.healthMgrName, res1.userId, res1.createTime , res1.userName , res1.dataMgrId, m.modelMgrId ,m.modelName
+        from
+        (
+            select h.healthMgrId , h.healthMgrName , h.userId,h.createTime , h.modelMgrId , h.dataMgrId , u.userName
+        from
+            healthmgr h , `user` u  where h.deleted  = 0 and u.deleted  = 0 and h.userId  = u.userId  ) as res1
+        left JOIN
+            modelmgr m
+        on
+            m.deleted  = 0 and res1.modelMgrId = m.modelMgrId
+        )
+        as  res2 , datamgr d
+        where  res2.dataMgrId = d.dataMgrId
+        order by res2.healthMgrId desc
+        ) as res3
+        where 1 = 1
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="healthMgrName!=null">res3.healthMgrName like concat(concat("%",#{healthMgrName}),"%") and</if>
+            <if test="modelName!=null">res3.modelName like concat(concat("%",#{modelName}),"%") and</if>
+            <if test="dataMgrName!=null">res3.dataMgrName like concat(concat("%",#{dataMgrName}),"%") and</if>
+        </trim>
+    </select>
+
+    <delete id="deleteHealthMgrByModelMgrId" parameterType="String">
+        update healthmgr set deleted = 1 where modelMgrId = #{ modelMgrId }
+    </delete>
+
+    <select id="getTypeCount" resultType="TypeCountDto">
+        SELECT COUNT( healthMgrId ) as num from healthmgr where deleted = 0
+    </select>
+    <select id="getalldataId" resultType="Long">
+        select dataMgrId from healthmgr where deleted=0
+    </select>
+    <update id="updateheal">
+        update healthmgr set healthMgrName=#{string},starttime=#{starttime} where healthMgrId=#{healthMgrId}
+    </update>
+    <select id="find" parameterType="Long" resultType="FlyEye">
+        select * from FlyEye where healthMgrId=#{healthMgrId}
+    </select>
+    <update id="updateFlyEyeNames" parameterType="FlyEye">
+        update FlyEye
+        <trim prefix="set" suffixOverrides=",">
+            <if test="Name1!=null">name1=#{Name1},</if>
+            <if test="Name2!=null">name2=#{Name2},</if>
+            <if test="Name3!=null">name3=#{Name3},</if>
+            <if test="Name4!=null">name4=#{Name4},</if>
+            <if test="Name5!=null">name5=#{Name5},</if>
+            <if test="Name6!=null">name6=#{Name6},</if>
+            <if test="Name7!=null">name7=#{Name7},</if>
+            <if test="Name8!=null">name8=#{Name8},</if>
+            <if test="Name9!=null">name9=#{Name9},</if>
+            <if test="Name10!=null">name10=#{Name10},</if>
+            <if test="Name11!=null">name11=#{Name11},</if>
+            <if test="Name12!=null">name12=#{Name12},</if>
+            <if test="Name13!=null">name13=#{Name13},</if>
+            <if test="Name14!=null">name14=#{Name14},</if>
+            <if test="Name15!=null">name15=#{Name15},</if>
+            <if test="Name16!=null">name16=#{Name16},</if>
+            <if test="Name17!=null">name17=#{Name17},</if>
+            <if test="Name18!=null">name18=#{Name18},</if>
+            <if test="Name19!=null">name19=#{Name19},</if>
+            <if test="healthMgrId!=null">healthMgrId=#{healthMgrId},</if>
+            <if test="Name1_max!=null">name1_max=#{Name1_max},</if>
+            <if test="Name2_max!=null">name2_max=#{Name2_max},</if>
+            <if test="Name3_max!=null">name3_max=#{Name3_max},</if>
+            <if test="Name4_max!=null">name4_max=#{Name4_max},</if>
+            <if test="Name5_max!=null">name5_max=#{Name5_max},</if>
+            <if test="Name6_max!=null">name6_max=#{Name6_max},</if>
+            <if test="Name1_min!=null">name1_min=#{Name1_min},</if>
+            <if test="Name2_min!=null">name2_min=#{Name2_min},</if>
+            <if test="Name3_min!=null">name3_min=#{Name3_min},</if>
+            <if test="Name4_min!=null">name4_min=#{Name4_min},</if>
+            <if test="Name5_min!=null">name5_min=#{Name5_min},</if>
+            <if test="Name6_min!=null">name6_min=#{Name6_min},</if>
+        </trim>
+        WHERE flyId=#{ FlyId }
+    </update>
+
+    <insert id="saveFlyEyeNames" parameterType="FlyEye">
+        insert into FlyEye(flyId,name1,name2,name3,name4,name5,name6,name7,name8,name9,name10,name11,name12,name13,name14,name15,name16,name17,name18,name19,healthMgrId,name1_max,name1_min,name2_max,name2_min,name3_max,name3_min,name4_max,name4_min,name5_max,name5_min,name6_max,name6_min) values (#{FlyId},#{Name1},#{Name2},#{Name3},#{Name4},#{Name5},#{Name6},#{Name7},#{Name8},#{Name9},#{Name10},#{Name11},#{Name12},#{Name13},#{Name14},#{Name15},#{Name16},#{Name17},#{Name18},#{Name19},#{healthMgrId},#{Name1_max},#{Name1_min},#{Name2_max},#{Name2_min},#{Name3_max},#{Name3_min},#{Name4_max},#{Name4_min},#{Name5_max},#{Name5_min},#{Name6_max},#{Name6_min})
+    </insert>
+    <select id="getdataMgrIdByhealthMgrId" parameterType="Long" resultType="Long">
+        select dataMgrId from healthmgr where healthMgrId=#{healthMgrId}
+    </select>
+</mapper>

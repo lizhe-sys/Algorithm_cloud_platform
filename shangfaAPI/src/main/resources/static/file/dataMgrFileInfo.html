@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>数据工程</title>
+		<link rel="shortcut icon" href="./img/dts.ico" type="image/x-icon">
+		<link rel="stylesheet" href="./css/index.css" />
+		<script type="text/javascript" src="./lib/jquery-3.3.1.min.js"></script>
+		<script type="text/javascript" src="./js/utils/TimeUtils.js"></script>
+		<script type="text/javascript" src="./js/constant/urls.js"></script>
+		<script type="text/javascript" src="./js/constant/SysConstent.js"></script>
+		<script type="text/javascript" src="./lib/web-uploader.min-0.1.6.js"></script>
+		<script type="text/javascript" src="./lib/uploader.js"></script>
+		<script type="text/javascript" src="./js/page/index.js"></script>
+	</head>
+	<body>
+		<div class="main">
+			<div class="top">
+				<p class="t-title"><i>数据工程</i></p>
+				<a class="t-right" href="javascript:;" onclick="refresh()">刷新</a>
+			</div>
+			<div class="sync-time">
+				文件同步时间：<span id="curr-date"></span>
+			</div>
+			<div class="file-list" id="fileList">
+				<ul>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript" src="./js/utils/line-background.js"></script>
+	</body>
+</html>
+<script>
+	var skin = 1;
+	var strcookie = document.cookie;//获取cookie字符串
+	var arrcookie = strcookie.split("; ");//分割
+	//遍历匹配
+	for (var i = 0; i < arrcookie.length; i++) {
+		var arr = arrcookie[i].split("=");
+		if (arr[0] == 'skinType') {
+			skin = arr[1];
+			break;
+		}
+	}
+	var title = document.getElementsByClassName("t-title")[0].style
+	var file = document.getElementsByClassName("file-list")[0].style
+	// 蓝色背景字体设置为白色
+	if( skin == 0 ){
+		title.color = "white"
+		file.color = "white"
+	}
+	// 白色背景字体设置为黑色
+	else{
+		title.color = "black"
+		file.color = "black"
+	}
+
+
+</script>

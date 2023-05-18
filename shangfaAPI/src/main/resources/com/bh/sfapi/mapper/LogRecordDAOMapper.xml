@@ -1,0 +1,31 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.LogRecordDAO">
+
+
+    <insert id="addLogRecord" parameterType="LogRecord">
+        insert into  logrecord ( logId ,userId, moduleName , createTime , operateDesc ) values ( #{logId},#{userId},#{moduleName},#{createTime},#{operateDesc} )
+    </insert>
+
+    <insert id="addFirstPageLogRecord" parameterType="LogRecord">
+        insert into  firstpagelog ( logId ,userId, moduleName , createTime , operateDesc ) values ( #{logId},#{userId},#{moduleName},#{createTime},#{operateDesc} )
+    </insert>
+    <select id="getLogRecordList" resultType="LogRecord">
+        SELECT log.* , u.userName from logrecord log, `user` u where log.userId = u.userId ORDER BY logId DESC
+    </select>
+
+    <!--  查询出最新的20条日志  -->
+    <select id="logInfo" resultType="LogRecord">
+        SELECT log.* , u.userName from firstpagelog log, `user` u where log.userId = u.userId ORDER BY logId DESC limit 20
+    </select>
+
+    <select id="dimQueryLogRecordByPage" resultType="LogRecord">
+        SELECT log.* , u.userName from logrecord log, `user` u where log.userId = u.userId
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="operateDesc!=null">log.operateDesc like concat(concat("%",#{operateDesc}),"%") and</if>
+            <if test="userName!=null">u.userName like concat(concat("%",#{userName}),"%") and</if>
+            <if test="moduleName!=null">log.moduleName = #{moduleName} and</if>
+        </trim>
+        ORDER BY logId DESC
+    </select>
+</mapper>

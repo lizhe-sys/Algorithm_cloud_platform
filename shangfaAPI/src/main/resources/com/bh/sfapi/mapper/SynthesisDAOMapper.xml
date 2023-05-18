@@ -1,0 +1,52 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.SynthesisDAO">
+
+    <insert id="save" parameterType="Synthesis">
+        insert into  synthesis values ( #{synthesisId},#{synthesisName},#{synthesisType},#{userId},#{createTime},#{frequency},#{deleted} )
+    </insert>
+
+    <update id="deleteSynthesisById" parameterType="Long">
+        update synthesis set deleted = 1 where  synthesisId = #{ synthesisId }
+    </update>
+
+    <select id="querySynthesisListByPage" resultType="Synthesis">
+        SELECT s.* , u.userName
+        FROM synthesis s , `user` u where s.deleted  = 0 and u.deleted = 0 and s.userId  = u.userId
+        order by s.createTime desc
+    </select>
+
+    <select id="dimQuerySynthesisListByPage" resultType="Synthesis" parameterType="Synthesis">
+        SELECT s.* , u.userName
+        FROM synthesis s , `user` u where s.deleted  = 0 and u.deleted = 0 and s.userId  = u.userId
+        <trim  prefix="and" suffixOverrides="and">
+        <if test="synthesisName!=null">synthesisName like concat(concat("%",#{synthesisName}),"%") and</if>
+        <if test="synthesisType!=0">synthesisType = #{ synthesisType } and</if>
+        </trim>
+        order by s.createTime desc
+    </select>
+
+    <update id="updateSynthesis" parameterType="Synthesis">
+        update synthesis
+        <trim prefix="set" suffixOverrides=",">
+            <if test="synthesisName!=null">synthesisName=#{synthesisName},</if>
+            <if test="synthesisType!=0">synthesisType=#{synthesisType},</if>
+            <if test="frequency!=0">frequency=#{frequency},</if>
+        </trim>
+        WHERE synthesisId=#{synthesisId}
+    </update>
+
+    <select id="synthesisInfo" resultType="SynthesisInfoDto">
+        SELECT synthesisType  , COUNT( synthesisId ) as synthesisCount from synthesis where deleted = 0 group by synthesisType
+    </select>
+
+    <select id="getSynthesisById" parameterType="Long"  resultType="Synthesis">
+        select * from synthesis where deleted = 0 and synthesisId = #{ synthesisId }
+    </select>
+
+    <select id="getTypeCount" resultType="TypeCountDto">
+        SELECT synthesisType as type , COUNT( synthesisId ) as num  from synthesis where deleted = 0 GROUP BY synthesisType
+    </select>
+
+
+</mapper>

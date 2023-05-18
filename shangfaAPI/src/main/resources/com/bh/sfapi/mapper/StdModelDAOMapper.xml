@@ -1,0 +1,100 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bh.sfapi.dao.StdModelDAO">
+
+    <insert id="addStdModelMgr" parameterType="StdModel" useGeneratedKeys="true" keyProperty="stdModelId">
+        insert into stdmodel( stdModelId,stdModelType,stdModelName,dataMgrId,createTime,userId,isShare,deleted,score,callCount ) values ( #{stdModelId},#{stdModelType},#{stdModelName},#{dataMgrId},#{createTime},#{userId},#{isShare},#{deleted},#{score},#{callCount} )
+    </insert>
+
+    <select id="queryNewStdModel" parameterType="Long" resultType="StdModel">
+        SELECT * FROM stdmodel where userId = #{userId} ORDER by stdModelId desc limit 1;
+    </select>
+
+    <update id="updateStdModel"  parameterType="StdModel">
+        UPDATE stdmodel
+        <trim prefix="set" suffixOverrides=",">
+            <if test="stdModelName!=null">stdModelName=#{stdModelName},</if>
+            <if test="stdModelDes!=null">stdModelDes=#{stdModelDes},</if>
+            <if test="dataMgrId!=null">dataMgrId=#{dataMgrId},</if>
+            <if test="isShare!=null">isShare=#{isShare},</if>
+            <if test="deleted!=null">deleted=#{deleted},</if>
+            <if test="score!=null">score=#{score},</if>
+            <if test="fileId!=null">fileId=#{fileId},</if>
+            <if test="callCount!=null">callCount=#{callCount},</if>
+            <if test="maxScore!=null">maxScore=#{maxScore},</if>
+            <if test="minScore!=null">minScore=#{minScore},</if>
+        </trim>
+        WHERE stdModelId=#{stdModelId}
+    </update>
+
+    <update id="updatePackStdModel" parameterType="StdModelDto">
+        UPDATE stdmodel
+        <trim prefix="set" suffixOverrides=",">
+            <if test="stdModelName!=null">stdModelName=#{stdModelName},</if>
+            <if test="stdModelDes!=null">stdModelDes=#{stdModelDes},</if>
+            <if test="addr!=null">addr=#{addr},</if>
+            <if test="protocol!=null">protocol=#{protocol},</if>
+            <if test="requestParam!=null">requestParam=#{requestParam},</if>
+            <if test="requestParamRemark!=null">requestParamRemark=#{requestParamRemark},</if>
+            <if test="responseParam!=null">responseParam=#{responseParam},</if>
+            <if test="responseParamRemak!=null">responseParamRemak=#{responseParamRemak},</if>
+        </trim>
+        WHERE stdModelId=#{stdModelId}
+    </update>
+
+
+    <select id="getSharedStdModelList" resultType="StdModel">
+        SELECT s.* , u2.userName , d.dataMgrName ,d.dataType FROM stdmodel s , `user` u2  , datamgr d
+        where s.deleted = 0 and u2.deleted = 0 and d.deleted  = 0 and s.userId  = u2.userId  and s.dataMgrId  = d.dataMgrId and ( s.isShare = 1 or s.userId = #{ userId } )
+        ORDER by stdModelId DESC
+    </select>
+
+    <select id="getStdModelList" resultType="StdModel">
+        SELECT s.* , u2.userName ,  d.dataMgrName ,d.dataType  FROM stdmodel s , `user` u2  , datamgr d
+        where s.deleted = 0 and u2.deleted = 0 and d.deleted  = 0 and s.userId  = u2.userId  and s.dataMgrId  = d.dataMgrId
+        ORDER by stdModelId DESC
+    </select>
+
+    <select id="queryStdModelById" parameterType="Long" resultType="StdModel">
+        SELECT * FROM stdmodel where deleted = 0 and stdModelId = #{ stdModelId }
+    </select>
+
+    <select id="dimQueryStdModel" parameterType="StdModel" resultType="StdModel">
+        SELECT s.* , u2.userName ,  d.dataMgrName ,d.dataType  FROM stdmodel s , `user` u2  , datamgr d
+        where s.deleted = 0 and u2.deleted = 0 and d.deleted  = 0 and s.userId  = u2.userId  and s.dataMgrId  = d.dataMgrId
+        <trim  prefix="and" suffixOverrides="and">
+            <if test="stdModelType!=null">stdModelType = #{ stdModelType } and</if>
+            <if test="stdModelName!=null">stdModelName like concat(concat("%",#{stdModelName}),"%") and</if>
+            <if test="dataMgrName!=null">d.dataMgrName like concat(concat("%",#{dataMgrName}),"%") and</if>
+        </trim>
+        ORDER by stdModelId DESC
+    </select>
+
+    <select id="getPackStdModelById" parameterType="Long" resultType="StdModelDto">
+        SELECT s.* , u2.userName ,  d.dataMgrName ,d.dataType  FROM stdmodel s , `user` u2  , datamgr d
+        where s.deleted = 0 and u2.deleted = 0 and d.deleted  = 0 and s.userId  = u2.userId  and s.dataMgrId  = d.dataMgrId
+        and stdModelId = #{ id }
+    </select>
+    
+    <select id="queryStdModelByName" parameterType="String" resultType="StdModel">
+        SELECT * FROM stdmodel where deleted = 0 and stdModelName = #{ stdModelName }
+    </select>
+
+    <select id="getStdModelListInfo" resultType="StdModel">
+        select * from stdmodel where deleted = 0
+    </select>
+
+    <select id="getTypeCount" resultType="TypeCountDto">
+        SELECT stdModelType as type , COUNT( stdModelId ) as num  from stdmodel where deleted = 0 GROUP BY stdModelType
+    </select>
+
+    <select id="firstPageStdModelInfo" parameterType="Integer" resultType="StdModelInfo">
+        SELECT  month( createTime ) as month, COUNT( stdModelId ) as num
+        from stdmodel
+        where deleted = 0 and stdModelType = #{type} and year( createTime ) = #{ year }
+        GROUP BY  month( createTime )
+
+    </select>
+
+
+</mapper>
